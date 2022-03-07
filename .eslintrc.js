@@ -6,7 +6,6 @@ module.exports = {
   },
   extends: [
     'plugin:react/recommended',
-    'airbnb',
   ],
   settings: {
     'import/resolver': {
@@ -56,14 +55,6 @@ module.exports = {
     'no-multiple-empty-lines': ['error', { max: 1 }],
     '@typescript-eslint/lines-between-class-members': 'off',
     'class-methods-use-this': 'off',
-    'import/no-extraneous-dependencies': [
-      'error',
-      {
-        devDependencies: [
-          '**/*.test.ts',
-        ],
-      },
-    ],
     'import/extensions': 'off',
     'import/no-absolute-path': 'off',
     'no-plusplus': [
