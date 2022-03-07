@@ -22,6 +22,7 @@ export const ThemeSwitcher = (props: ThemeSwitcherProps) => {
     <Button
       onClick={switchTheme}
       style={{ position: 'absolute', top: '1em', right: '1em' }}
+      primary
     >
       Theme:
       {' '}

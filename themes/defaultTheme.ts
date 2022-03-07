@@ -1,27 +1,45 @@
 import { DefaultTheme } from 'styled-components';
-import { white, gray, black } from './theme';
+import { white, black } from './theme';
 
 export const defaultTheme: DefaultTheme = {
-  palette: {
-    common: {
-      black,
-      gray,
-      white,
+  text: {
+    foreground: {
+      normal: black,
+      disabled: black,
     },
-    primary: {
-      color: '#726A95',
+    background: {
+      normal: white,
+      disabled: white,
+    },
+  },
+  primary: {
+    foreground: {
+      normal: white,
+      disabled: white,
+    },
+    background: {
+      normal: '#726A95',
       disabled: '#726A9580',
-      contrast: white,
     },
-    secondary: {
-      color: '#709FB0',
+  },
+  secondary: {
+    foreground: {
+      normal: white,
+      disabled: white,
+    },
+    background: {
+      normal: '#709FB0',
       disabled: '#709FB080',
-      contrast: white,
     },
-    error: {
-      color: '#B00020',
+  },
+  error: {
+    foreground: {
+      normal: white,
+      disabled: white,
+    },
+    background: {
+      normal: '#B00020',
       disabled: '#B0002080',
-      contrast: white,
     },
   },
 };

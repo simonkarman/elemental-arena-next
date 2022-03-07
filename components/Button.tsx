@@ -9,23 +9,23 @@ export interface ButtonProps {
 export const Button = styled.button<ButtonProps>`
   background: transparent;
   border-radius: 3px;
-  border: 2px solid ${(props) => (props.accent?.color || props.theme.palette.primary.color)};
-  color: ${(props) => props.accent?.color || props.theme.palette.primary.color};
+  border: 2px solid ${(props) => (props.accent || props.theme.primary).background.normal};
+  color: ${(props) => (props.accent || props.theme.primary).background.normal};
   padding: 0.25em 1em;
   cursor: pointer;
 
   ${(props) => props.primary
     && css`
-      background: ${props.accent?.color || props.theme.palette.primary.color};
-      color: ${props.accent?.contrast || props.theme.palette.primary.contrast};
+      background: ${(props.accent || props.theme.primary).background.normal};
+      color: ${(props.accent || props.theme.primary).foreground.normal};
 
       :disabled {
-        background: ${props.accent?.disabled || props.theme.palette.primary.disabled};
+        background: ${(props.accent || props.theme.primary).background.disabled};
       }
     `};
 
   :disabled {
-    border-color: ${(props) => props.accent?.disabled || props.theme.palette.primary.disabled};
+    border-color: ${(props) => (props.accent || props.theme.primary).background.disabled};
     cursor: default;
   }
   `;

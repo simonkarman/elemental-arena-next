@@ -1,19 +1,21 @@
 import type { NextPage } from 'next';
-import { useState } from 'react';
+import { useContext } from 'react';
+import { ThemeContext } from 'styled-components';
 
 const Landing: NextPage = () => {
-  const [number, setNumber] = useState(0);
+  const theme = useContext(ThemeContext);
   return (
     <>
       <h1>Elemental Arena</h1>
-      <hr />
-      <button
-        type="button"
-        onClick={() => setNumber(number + 1)}
+      <svg style={{
+        border: `1px solid ${theme.primary.background.normal}`,
+        width: '100%',
+      }}
       >
-        #
-        {number}
-      </button>
+        <g>
+          <line x1={10} x2={100} y1={10} y2={40} stroke={theme.text.foreground.normal} />
+        </g>
+      </svg>
     </>
   );
 };
