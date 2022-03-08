@@ -1,10 +1,11 @@
 import type { NextPage } from 'next';
-import { useContext, useState } from 'react';
+import { MouseEventHandler, useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
 import { Palette } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { HexDirection } from '../utils/HexDirection';
 import { hexCorner } from '../utils/Math';
+import { Vector2 } from '../utils/Vector2';
 
 interface HexagonProps {
   pixelSize: number,
@@ -47,16 +48,25 @@ const Landing: NextPage = () => {
     ...AxialCoordinate.circle(new AxialCoordinate(14, -2), 3),
     ...AxialCoordinate.rectangle(new AxialCoordinate(5, 2), HexDirection.RightDown, 5, 2),
   ];
+  const [mouseCoordinate, setMouseCoordinate] = useState(new AxialCoordinate(0, 0));
+  const onMouseMove: MouseEventHandler = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pixel = new Vector2(e.clientX - rect.x, e.clientY - rect.y);
+    setMouseCoordinate(AxialCoordinate.fromPixel(pixel, 27).rounded());
+  };
   return (
     <>
       <h1>Elemental Arena</h1>
-      <svg style={{
-        border: `1px solid ${theme.primary.background.normal}`,
-        backgroundColor: theme.primary.background.disabled,
-        width: '100%',
-        height: '400px',
-      }}
+      <svg
+        style={{
+          border: `1px solid ${theme.primary.background.normal}`,
+          backgroundColor: theme.primary.background.disabled,
+          width: '100%',
+          height: '400px',
+        }}
+        onMouseMove={onMouseMove}
       >
+        <Hexagon coord={mouseCoordinate} pixelSize={27} stroke={theme.secondary} />
         {coordinates.map(coordinate => <Hexagon
           key={coordinate.toString()}
           pixelSize={27}
