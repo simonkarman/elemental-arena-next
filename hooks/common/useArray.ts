@@ -1,6 +1,15 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-export const useArray = <T>(defaultValue: T[]) => {
+interface UseArrayAddons<T> {
+  clear(): void;
+  push(element: T): void;
+  filter(predicate: (item: T, index: number, arr: T[]) => boolean): void;
+  setAt(index: number, item: T): void;
+  updateAt(index: number, item: (old: T) => T): void;
+  removeAt(index: number): void;
+}
+
+export const useArray = <T>(defaultValue: T[]): [T[], Dispatch<SetStateAction<T[]>>, UseArrayAddons<T>] => {
   const [array, setArray] = useState(defaultValue);
 
   const clear = () => {
@@ -8,15 +17,15 @@ export const useArray = <T>(defaultValue: T[]) => {
   };
 
   const push = (element: T) => {
-    setArray((a) => [...a, element]);
+    setArray(a => [...a, element]);
   };
 
   const filter = (predicate: (item: T, index: number, arr: T[]) => boolean) => {
-    setArray((arr) => arr.filter(predicate));
+    setArray(arr => arr.filter(predicate));
   };
 
   const setAt = (index: number, item: T) => {
-    setArray((a) => [
+    setArray(a => [
       ...a.slice(0, index),
       item,
       ...a.slice(index + 1, a.length - 1),

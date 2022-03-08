@@ -1,6 +1,7 @@
 import type { NextPage } from 'next';
 import { MouseEventHandler, useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
+import { useArray } from '../hooks';
 import { Palette } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { HexDirection } from '../utils/HexDirection';
@@ -44,15 +45,17 @@ const Hexagon = (props: HexagonProps) => {
 
 const Landing: NextPage = () => {
   const theme = useContext(ThemeContext);
-  const coordinates = [
+  const [coordinates,, coordinatesAddons] = useArray([
     ...AxialCoordinate.circle(new AxialCoordinate(14, -2), 3),
     ...AxialCoordinate.rectangle(new AxialCoordinate(5, 2), HexDirection.RightDown, 5, 2),
-  ];
-  const [mouseCoordinate, setMouseCoordinate] = useState(new AxialCoordinate(0, 0));
-  const onMouseMove: MouseEventHandler = (e) => {
+  ]);
+  const onClick: MouseEventHandler = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pixel = new Vector2(e.clientX - rect.x, e.clientY - rect.y);
-    setMouseCoordinate(AxialCoordinate.fromPixel(pixel, 27).rounded());
+    const coord = AxialCoordinate.fromPixel(pixel, 27).rounded();
+    if (!coordinates.find(otherCoord => AxialCoordinate.approximatelyEqual(coord, otherCoord))) {
+      coordinatesAddons.push(coord);
+    }
   };
   return (
     <>
@@ -64,9 +67,8 @@ const Landing: NextPage = () => {
           width: '100%',
           height: '400px',
         }}
-        onMouseMove={onMouseMove}
+        onClick={onClick}
       >
-        <Hexagon coord={mouseCoordinate} pixelSize={27} stroke={theme.secondary} />
         {coordinates.map(coordinate => <Hexagon
           key={coordinate.toString()}
           pixelSize={27}

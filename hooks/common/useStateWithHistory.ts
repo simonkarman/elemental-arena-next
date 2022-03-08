@@ -1,6 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 
-export const useStateWithHistory = <T>(defaultValue: T, maxCapacity: number = 10) => {
+interface UseHistoryAddons<T> {
+  history: T[],
+  pointer: number,
+  back(): void,
+  forward(): void,
+  go(index: number): void,
+}
+
+export const useStateWithHistory = <T>(defaultValue: T, maxCapacity: number = 10): [T, (newValue: T) => void, UseHistoryAddons<T>] => {
   const [value, setValue] = useState(defaultValue);
   const historyRef = useRef([value]);
   const pointerRef = useRef(0);
