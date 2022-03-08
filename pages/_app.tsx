@@ -7,14 +7,14 @@ import { ThemeSwitcher, ThemeName, themes } from '../components/ThemeSwitcher';
 
 const GlobalStyle = createGlobalStyle`
   body {
-    background-color: ${(props) => props.theme.text.background.normal};
-    color: ${(props) => props.theme.text.foreground.normal};
+    background-color: ${(props) => props.theme.typography.background.normal};
+    color: ${(props) => props.theme.typography.text.normal};
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
       Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   }
 
   a {
-    color: ${(props) => props.theme.primary.background.normal};
+    color: ${(props) => props.theme.typography.background.normal};
     text-decoration: none;
   }
 

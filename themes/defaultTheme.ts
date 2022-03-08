@@ -2,43 +2,25 @@ import { DefaultTheme } from 'styled-components';
 import { white, black } from './theme';
 
 export const defaultTheme: DefaultTheme = {
-  text: {
-    foreground: {
+  typography: {
+    text: {
       normal: black,
+      contrast: white,
       disabled: black,
     },
-    background: {
-      normal: white,
-      disabled: white,
-    },
-  },
-  primary: {
-    foreground: {
-      normal: white,
-      disabled: white,
-    },
-    background: {
+    accent: {
       normal: '#726A95',
+      contrast: white,
       disabled: '#726A9580',
     },
-  },
-  secondary: {
-    foreground: {
+    background: {
       normal: white,
+      contrast: black,
       disabled: white,
     },
-    background: {
-      normal: '#709FB0',
-      disabled: '#709FB080',
-    },
-  },
-  error: {
-    foreground: {
-      normal: white,
-      disabled: white,
-    },
-    background: {
+    error: {
       normal: '#B00020',
+      contrast: white,
       disabled: '#B0002080',
     },
   },

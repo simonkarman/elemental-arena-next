@@ -1,31 +1,27 @@
 import type { NextPage } from 'next';
 import { MouseEventHandler, useContext, useState } from 'react';
-import { ThemeContext } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
+import { Button } from '../components/Button';
 import { useArray } from '../hooks';
-import { Palette } from '../themes/theme';
+import { ThemeColor } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { HexDirection } from '../utils/HexDirection';
 import { hexCorner } from '../utils/Math';
 import { Vector2 } from '../utils/Vector2';
 
-interface HexagonProps {
+const Tile = (props: {
   pixelSize: number,
   coord: AxialCoordinate,
-  stroke: Palette,
-}
-
-const Hexagon = (props: HexagonProps) => {
+  stroke: ThemeColor,
+}) => {
   const { pixelSize, coord, stroke } = props;
-  const [isClicked, setIsClicked] = useState(false);
   return (
     <g transform={`translate(${coord.toPixel(pixelSize).x} ${coord.toPixel(pixelSize).y})`}>
       <circle
         cx={0}
         cy={0}
         r={pixelSize / 1.3}
-        fill={isClicked ? props.stroke.background.disabled : '#FFFFFF00'}
-        stroke={stroke.background.disabled}
-        onClick={() => setIsClicked(!isClicked)}
+        fill="#FFFFFF00"
       />
       {AxialCoordinate.Directions.map((_, index) => {
         const from = hexCorner(pixelSize, index);
@@ -35,7 +31,7 @@ const Hexagon = (props: HexagonProps) => {
             key={index}
             x1={from.x} y1={from.y}
             x2={to.x} y2={to.y}
-            stroke={stroke.foreground.normal}
+            stroke={stroke.normal}
           />
         );
       })}
@@ -43,37 +39,94 @@ const Hexagon = (props: HexagonProps) => {
   );
 };
 
+const Creature = (props: {
+  pixelSize: number,
+  coord: AxialCoordinate,
+}) => {
+  const { pixelSize, coord } = props;
+  const theme = useContext(ThemeContext);
+  return (
+    <g transform={`translate(${coord.toPixel(pixelSize).x} ${coord.toPixel(pixelSize).y})`}>
+      <circle
+        cx={0}
+        cy={0}
+        r={pixelSize * 0.7}
+        fill="none"
+        stroke={theme.typography.accent.normal}
+        strokeWidth={1}
+      />
+    </g>
+  );
+};
+
+const ButtonRow = styled.div`
+  padding-bottom: 0.25em;
+
+  button:first-child {
+    margin-right: 0.25em;
+  }
+`;
+
 const Landing: NextPage = () => {
   const theme = useContext(ThemeContext);
-  const [coordinates,, coordinatesAddons] = useArray([
+  const [mode, setMode] = useState<'tile' | 'creature'>('tile');
+  const [tiles,, tilesAddons] = useArray([
     ...AxialCoordinate.circle(new AxialCoordinate(14, -2), 3),
     ...AxialCoordinate.rectangle(new AxialCoordinate(5, 2), HexDirection.RightDown, 5, 2),
+  ]);
+  const [creatures,, creaturesAddons] = useArray<AxialCoordinate>([
+    new AxialCoordinate(14, -2),
   ]);
   const onClick: MouseEventHandler = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pixel = new Vector2(e.clientX - rect.x, e.clientY - rect.y);
     const coord = AxialCoordinate.fromPixel(pixel, 27).rounded();
-    if (!coordinates.find(otherCoord => AxialCoordinate.approximatelyEqual(coord, otherCoord))) {
-      coordinatesAddons.push(coord);
+    const tileExists = tiles.find(tile => AxialCoordinate.approximatelyEqual(coord, tile));
+    if (mode == 'tile') {
+      if (tileExists) {
+      } else {
+        tilesAddons.push(coord);
+      }
+    }
+    if (mode == 'creature') {
+      if (tileExists) {
+        const creatureExists = creatures.find(creature => AxialCoordinate.approximatelyEqual(coord, creature));
+        if (!creatureExists) {
+          creaturesAddons.push(coord);
+        }
+      }
     }
   };
   return (
     <>
       <h1>Elemental Arena</h1>
+      <ButtonRow>
+        <Button primary={mode == 'tile'} onClick={() => setMode('tile')}>
+          Tile
+        </Button>
+        <Button primary={mode == 'creature'} onClick={() => setMode('creature')}>
+          Creature
+        </Button>
+      </ButtonRow>
       <svg
         style={{
-          border: `1px solid ${theme.primary.background.normal}`,
-          backgroundColor: theme.primary.background.disabled,
+          border: `1px solid ${theme.typography.background.contrast}`,
+          backgroundColor: theme.typography.background.normal,
           width: '100%',
           height: '400px',
         }}
         onClick={onClick}
       >
-        {coordinates.map(coordinate => <Hexagon
-          key={coordinate.toString()}
+        {tiles.map(tile => <Tile
+          key={tile.toString()}
           pixelSize={27}
-          coord={coordinate}
-          stroke={theme.primary}
+          coord={tile}
+          stroke={theme.typography.text}
+        />)}
+        {creatures.map(creature => <Creature
+          key={creature.toString()}
+          pixelSize={27}
+          coord={creature}
         />)}
       </svg>
     </>

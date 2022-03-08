@@ -1,23 +1,21 @@
 import 'styled-components';
 
-export const white = '#FFF';
+export const white = '#f2f2f2';
 export const black = '#222831';
 
-export interface Color {
+export interface ThemeColor {
   normal: string;
   disabled: string;
-}
-
-export interface Palette {
-  background: Color;
-  foreground: Color;
+  contrast: string;
 }
 
 declare module 'styled-components' {
   export interface DefaultTheme {
-    text: Palette;
-    primary: Palette;
-    secondary: Palette;
-    error: Palette;
+    typography: {
+      text: ThemeColor;
+      background: ThemeColor;
+      accent: ThemeColor;
+      error: ThemeColor;
+    }
   }
 }
