@@ -41,7 +41,7 @@ export const useArray = <T>(defaultValue: T[]): [T[], Dispatch<SetStateAction<T[
   };
 
   const removeAt = (index: number) => {
-    setArray((a) => [...a.slice(0, index), ...a.slice(index + 1, a.length - 1)]);
+    setArray((a) => [...a.slice(0, index), ...a.slice(index + 1, a.length)]);
   };
 
   return [array, setArray, {

@@ -6,7 +6,7 @@ export const defaultTheme: DefaultTheme = {
     text: {
       normal: black,
       contrast: white,
-      disabled: black,
+      disabled: '#DCDCDC',
     },
     accent: {
       normal: '#726A95',
@@ -16,7 +16,7 @@ export const defaultTheme: DefaultTheme = {
     background: {
       normal: white,
       contrast: black,
-      disabled: white,
+      disabled: '#434343',
     },
     error: {
       normal: '#B00020',

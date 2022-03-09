@@ -1,11 +1,10 @@
 import type { NextPage } from 'next';
-import { MouseEventHandler, useContext, useState } from 'react';
+import { MouseEventHandler, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { Button } from '../components/Button';
 import { useArray } from '../hooks';
 import { ThemeColor } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
-import { HexDirection } from '../utils/HexDirection';
 import { hexCorner } from '../utils/Math';
 import { Vector2 } from '../utils/Vector2';
 
@@ -15,17 +14,24 @@ const Tile = (props: {
   stroke: ThemeColor,
 }) => {
   const { pixelSize, coord, stroke } = props;
+  const corners = useMemo(
+    () => AxialCoordinate.Directions.map((_, index) => hexCorner(pixelSize, index)),
+    [pixelSize],
+  );
   return (
     <g transform={`translate(${coord.toPixel(pixelSize).x} ${coord.toPixel(pixelSize).y})`}>
       <circle
         cx={0}
         cy={0}
         r={pixelSize / 1.3}
-        fill="#FFFFFF00"
+        fill={stroke.contrast}
       />
-      {AxialCoordinate.Directions.map((_, index) => {
-        const from = hexCorner(pixelSize, index);
-        const to = hexCorner(pixelSize, (index + 1) % 6);
+      <polygon
+        points={corners.map(corner => `${corner.x},${corner.y}`).join(' ')}
+        fill={stroke.disabled}
+      />
+      {corners.map((from, index) => {
+        const to = corners[(index + 1) % 6];
         return (
           <line
             key={index}
@@ -51,7 +57,7 @@ const Creature = (props: {
         cx={0}
         cy={0}
         r={pixelSize * 0.7}
-        fill="none"
+        fill={theme.typography.accent.disabled}
         stroke={theme.typography.accent.normal}
         strokeWidth={1}
       />
@@ -70,29 +76,31 @@ const ButtonRow = styled.div`
 const Landing: NextPage = () => {
   const theme = useContext(ThemeContext);
   const [mode, setMode] = useState<'tile' | 'creature'>('tile');
-  const [tiles,, tilesAddons] = useArray([
-    ...AxialCoordinate.circle(new AxialCoordinate(14, -2), 3),
-    ...AxialCoordinate.rectangle(new AxialCoordinate(5, 2), HexDirection.RightDown, 5, 2),
-  ]);
-  const [creatures,, creaturesAddons] = useArray<AxialCoordinate>([
-    new AxialCoordinate(14, -2),
-  ]);
+  const [tiles,, tilesAddons] = useArray(AxialCoordinate.circle(new AxialCoordinate(5, 1), 4));
+  const [creatures,, creaturesAddons] = useArray<AxialCoordinate>([]);
+  const pixelSize = 27;
   const onClick: MouseEventHandler = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pixel = new Vector2(e.clientX - rect.x, e.clientY - rect.y);
-    const coord = AxialCoordinate.fromPixel(pixel, 27).rounded();
-    const tileExists = tiles.find(tile => AxialCoordinate.approximatelyEqual(coord, tile));
+    const coord = AxialCoordinate.fromPixel(pixel, pixelSize).rounded();
+    const tileIndex = tiles.findIndex(tile => AxialCoordinate.approximatelyEqual(coord, tile));
+    const creatureIndex = creatures.findIndex(creature => AxialCoordinate.approximatelyEqual(coord, creature));
     if (mode == 'tile') {
-      if (tileExists) {
-      } else {
+      if (tileIndex === -1) {
         tilesAddons.push(coord);
+      } else {
+        tilesAddons.removeAt(tileIndex);
+        if (creatureIndex !== -1) {
+          creaturesAddons.removeAt(creatureIndex);
+        }
       }
     }
     if (mode == 'creature') {
-      if (tileExists) {
-        const creatureExists = creatures.find(creature => AxialCoordinate.approximatelyEqual(coord, creature));
-        if (!creatureExists) {
+      if (tileIndex !== -1) {
+        if (creatureIndex === -1) {
           creaturesAddons.push(coord);
+        } else {
+          creaturesAddons.removeAt(creatureIndex);
         }
       }
     }
@@ -103,29 +111,31 @@ const Landing: NextPage = () => {
       <ButtonRow>
         <Button primary={mode == 'tile'} onClick={() => setMode('tile')}>
           Tile
+          {` (x${tiles.length})`}
         </Button>
         <Button primary={mode == 'creature'} onClick={() => setMode('creature')}>
           Creature
+          {` (x${creatures.length})`}
         </Button>
       </ButtonRow>
       <svg
         style={{
           border: `1px solid ${theme.typography.background.contrast}`,
           backgroundColor: theme.typography.background.normal,
-          width: '100%',
-          height: '400px',
+          width: (7 * 2 + 1) * pixelSize,
+          height: 7 * Math.sqrt(3) * pixelSize,
         }}
         onClick={onClick}
       >
         {tiles.map(tile => <Tile
           key={tile.toString()}
-          pixelSize={27}
+          pixelSize={pixelSize}
           coord={tile}
           stroke={theme.typography.text}
         />)}
         {creatures.map(creature => <Creature
           key={creature.toString()}
-          pixelSize={27}
+          pixelSize={pixelSize}
           coord={creature}
         />)}
       </svg>
