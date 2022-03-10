@@ -21,6 +21,10 @@ const GlobalStyle = createGlobalStyle`
   *:focus {
     outline: none;
   }
+
+  svg text {
+    pointer-events: none;
+  }
 `;
 
 const Container = styled.div`

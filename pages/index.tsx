@@ -31,34 +31,15 @@ const Tile = (props: { biome: 'forest' | 'mountain' | 'swamp'}) => {
   );
 };
 
-const Crown = (props: { controller: Controller }) => {
-  const pixelSize = useContext(PixelSizeContext);
-  const { controller } = props;
-  const width = pixelSize * 0.2;
-  const height = pixelSize * 0.34;
-  return (
-    <polygon
-      points={`${-width},0 ${width},0 ${width},${-height} ${0},${-height * 0.7} ${-width},${-height}`}
-      fill={controller.color.normal}
-      stroke={controller.color.contrast}
-      strokeWidth="0.5"
-    />
-  );
-};
-
-interface Controller {
-  color: ThemeColor;
-}
-
 const Creature = (props: {
-  controller: Controller,
-  isKing: boolean,
+  color: ThemeColor,
   power: number,
   health: number,
   baseEnergy: number,
   energy: number,
+  icons: { color: ThemeColor, icon: string, action: () => void }[],
 }) => {
-  const { controller, isKing, power, health, baseEnergy, energy } = props;
+  const { color, power, health, baseEnergy, energy, icons } = props;
   const theme = useContext(ThemeContext);
   const pixelSize = useContext(PixelSizeContext);
   const numbers = useMemo(() => [
@@ -67,6 +48,7 @@ const Creature = (props: {
     { fontSize: pixelSize / 3, degrees: 250, color: theme.game.forest.normal, value: energy.toString() },
     { fontSize: pixelSize / 4, degrees: 300, color: theme.game.forest.disabled, value: `/${baseEnergy}` },
   ], [health, power, energy]);
+  const iconOffset = icons.length === 0 || icons[0].icon === '👑' ? 0 : 50;
   return (
     <>
       <circle
@@ -74,7 +56,7 @@ const Creature = (props: {
         cy={0}
         r={pixelSize * 0.7}
         fill={theme.typography.background.normal}
-        stroke={controller.color.normal}
+        stroke={color.normal}
         strokeWidth={1.75}
       />
       {numbers.map(number => (
@@ -92,11 +74,29 @@ const Creature = (props: {
           </text>
         </g>
       ))}
-      {isKing && (
-        <g transform={`translate(0,-${pixelSize * 0.65})`}>
-          <Crown controller={controller} />
+      {icons.map((icon, i) => (
+        <g
+          key={icon.icon}
+          transform={`translate(${Vector2.fromDegrees(270 + iconOffset + i * 50).mutliply(pixelSize * 0.7).toSvgString()})`}
+        >
+          <circle
+            cx={0}
+            cy={0}
+            r={pixelSize / 4}
+            fill={icon.color.normal}
+            stroke={icon.color.contrast}
+            strokeWidth={0.5}
+            onClick={icon.action}
+          />
+          <text
+            alignmentBaseline='middle'
+            textAnchor='middle'
+            fontSize={pixelSize / 4}
+          >
+            {icon.icon}
+          </text>
         </g>
-      )}
+      ))}
     </>
   );
 };
@@ -115,7 +115,7 @@ const ButtonRow = styled.div`
 
 const Landing: NextPage = () => {
   const theme = useContext(ThemeContext);
-  const [mode, setMode] = useState<'tile' | 'creature'>('tile');
+  const [mode, setMode] = useState<'none' | 'tile' | 'creature'>('none');
   const [tiles,, tilesAddons] = useArray(AxialCoordinate.circle(new AxialCoordinate(5, 1), 4));
   const [creatures,, creaturesAddons] = useArray<AxialCoordinate>([]);
   const [pixelSize, setPixelSize] = useState(40);
@@ -162,6 +162,9 @@ const Landing: NextPage = () => {
         </Button>
       </ButtonRow>
       <ButtonRow>
+        <Button primary={mode == 'none'} onClick={() => setMode('none')}>
+          None
+        </Button>
         <Button primary={mode == 'tile'} onClick={() => setMode('tile')}>
           Tile
           {` (x${tiles.length})`}
@@ -197,12 +200,33 @@ const Landing: NextPage = () => {
               transform={`translate(${creature.toPixel(pixelSize).x} ${creature.toPixel(pixelSize).y})`}
             >
               <Creature
-                isKing={i < 2}
                 health={i * 2}
                 power={Math.round(2 + i / 3)}
                 energy={2}
                 baseEnergy={3}
-                controller={{ color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB }}
+                color={i % 2 == 0 ? theme.game.playerA : theme.game.playerB}
+                icons={[
+                  ...(i < 2 ? [{
+                    color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB,
+                    icon: '👑',
+                    action: () => console.info('King of', i),
+                  }] : []),
+                  ...(i % 3 == 2 ? [{
+                    color: theme.game.forest,
+                    icon: '🔥',
+                    action: () => console.info('Fireball of', i),
+                  }] : []),
+                  ...(i % 4 == 3 ? [{
+                    color: theme.game.swamp,
+                    icon: '🌲',
+                    action: () => console.info('Tree of', i),
+                  }] : []),
+                  {
+                    color: theme.typography.background,
+                    icon: '🥑',
+                    action: () => console.info('Avocado of', i),
+                  },
+                ]}
               />
             </g>
           ))}
