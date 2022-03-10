@@ -1,7 +1,7 @@
 import { DefaultTheme } from 'styled-components';
 import { white, black } from './theme';
 
-export const invertedTheme: DefaultTheme = {
+export const darkTheme: DefaultTheme = {
   typography: {
     text: {
       normal: white,

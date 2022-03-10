@@ -14,17 +14,18 @@ const Tile = (props: { biome: 'forest' | 'mountain' | 'swamp'}) => {
   const pixelSize = useContext(PixelSizeContext);
   const { biome } = props;
   const corners = useMemo(
-    () => AxialCoordinate.Directions.map((_, index) => Vector2.fromDegrees(index * 60).mutliply(pixelSize - 1)),
+    () => AxialCoordinate.Directions.map((_, index) => Vector2.fromDegrees(index * 60).mutliply(pixelSize)),
     [pixelSize],
   );
   return (
     <>
       <polygon
         points={corners.map(corner => `${corner.x},${corner.y}`).join(' ')}
-        fill={theme.game[biome].disabled}
+        fill={theme.game[biome].normal}
         fillOpacity={0.1}
-        stroke={theme.game[biome].normal}
+        stroke={theme.typography.text.normal}
         strokeWidth={0.5}
+        strokeOpacity={0.3}
       />
     </>
   );
@@ -54,15 +55,17 @@ const Creature = (props: {
   isKing: boolean,
   power: number,
   health: number,
+  baseEnergy: number,
   energy: number,
 }) => {
-  const { controller, isKing, power, health, energy } = props;
+  const { controller, isKing, power, health, baseEnergy, energy } = props;
   const theme = useContext(ThemeContext);
   const pixelSize = useContext(PixelSizeContext);
   const numbers = useMemo(() => [
-    { degrees: 30, color: theme.game.mountain.normal, value: health },
-    { degrees: 150, color: theme.game.swamp.normal, value: power },
-    { degrees: 270, color: theme.game.forest.normal, value: energy },
+    { fontSize: pixelSize / 3, degrees: 40, color: theme.game.mountain.normal, value: health.toString() },
+    { fontSize: pixelSize / 3, degrees: 140, color: theme.game.swamp.normal, value: power.toString() },
+    { fontSize: pixelSize / 3, degrees: 250, color: theme.game.forest.normal, value: energy.toString() },
+    { fontSize: pixelSize / 4, degrees: 300, color: theme.game.forest.disabled, value: `/${baseEnergy}` },
   ], [health, power, energy]);
   return (
     <>
@@ -72,7 +75,7 @@ const Creature = (props: {
         r={pixelSize * 0.7}
         fill={theme.typography.background.normal}
         stroke={controller.color.normal}
-        strokeWidth={1}
+        strokeWidth={1.75}
       />
       {numbers.map(number => (
         <g
@@ -83,7 +86,7 @@ const Creature = (props: {
             fill={number.color}
             alignmentBaseline='middle'
             textAnchor='middle'
-            fontSize={pixelSize / 3}
+            fontSize={number.fontSize}
           >
             {number.value}
           </text>
@@ -171,7 +174,7 @@ const Landing: NextPage = () => {
       <PixelSizeContext.Provider value={pixelSize}>
         <svg
           style={{
-            border: `1px solid ${theme.typography.background.contrast}`,
+            border: `1px solid ${theme.typography.accent.normal}`,
             backgroundColor: theme.typography.background.normal,
             width: (7 * 2 + 1) * pixelSize,
             height: 7 * Math.sqrt(3) * pixelSize,
@@ -198,6 +201,7 @@ const Landing: NextPage = () => {
                 health={i * 2}
                 power={Math.round(2 + i / 3)}
                 energy={2}
+                baseEnergy={3}
                 controller={{ color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB }}
               />
             </g>

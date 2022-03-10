@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from 'react';
 import { defaultTheme } from '../themes/defaultTheme';
-import { invertedTheme } from '../themes/invertedTheme';
+import { darkTheme } from '../themes/darkTheme';
 import { Button } from './Button';
 
-export const themes = { defaultTheme, invertedTheme };
+export const themes = { defaultTheme, darkTheme };
 export type ThemeName = keyof typeof themes;
 
 export interface ThemeSwitcherProps {
@@ -15,7 +15,7 @@ export const ThemeSwitcher = (props: ThemeSwitcherProps) => {
   const { themeName, setThemeName } = props;
   const switchTheme = () => setThemeName(
     themeName === 'defaultTheme'
-      ? 'invertedTheme'
+      ? 'darkTheme'
       : 'defaultTheme',
   );
   return (
