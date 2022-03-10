@@ -18,7 +18,11 @@ declare module 'styled-components' {
       error: ThemeColor;
     }
     game: {
-      king: ThemeColor,
+      playerA: ThemeColor,
+      playerB: ThemeColor,
+      forest: ThemeColor,
+      mountain: ThemeColor,
+      swamp: ThemeColor,
     }
   }
 }

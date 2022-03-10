@@ -25,10 +25,30 @@ export const invertedTheme: DefaultTheme = {
     },
   },
   game: {
-    king: {
-      normal: '#D4AF37',
+    playerA: {
+      normal: '#FF5D00',
       contrast: black,
-      disabled: '#E2C876',
+      disabled: '#FF5D0080',
+    },
+    playerB: {
+      normal: '#00478F',
+      contrast: black,
+      disabled: '#00478F80',
+    },
+    forest: {
+      normal: '#59981A',
+      contrast: black,
+      disabled: '#3D550C',
+    },
+    mountain: {
+      normal: '#D41E00',
+      contrast: black,
+      disabled: '#481D01',
+    },
+    swamp: {
+      normal: '#695E93',
+      contrast: black,
+      disabled: '#281C2D',
     },
   },
 };

@@ -3,67 +3,66 @@ import React, { MouseEventHandler, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { Button } from '../components/Button';
 import { useArray } from '../hooks';
+import { ThemeColor } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { Vector2 } from '../utils/Vector2';
 
-const PixelSizeContext = React.createContext(27);
+const PixelSizeContext = React.createContext(40);
 
-const Tile = () => {
+const Tile = (props: { biome: 'forest' | 'mountain' | 'swamp'}) => {
   const theme = useContext(ThemeContext);
   const pixelSize = useContext(PixelSizeContext);
+  const { biome } = props;
   const corners = useMemo(
-    () => AxialCoordinate.Directions.map((_, index) => Vector2.fromDegrees(index * 60).mutliply(pixelSize)),
+    () => AxialCoordinate.Directions.map((_, index) => Vector2.fromDegrees(index * 60).mutliply(pixelSize - 1)),
     [pixelSize],
   );
   return (
     <>
       <polygon
         points={corners.map(corner => `${corner.x},${corner.y}`).join(' ')}
-        fill={theme.typography.text.disabled}
+        fill={theme.game[biome].disabled}
+        fillOpacity={0.1}
+        stroke={theme.game[biome].normal}
+        strokeWidth={0.5}
       />
-      {corners.map((from, index) => {
-        const to = corners[(index + 1) % 6];
-        return (
-          <line
-            key={index}
-            x1={from.x} y1={from.y}
-            x2={to.x} y2={to.y}
-            stroke={theme.typography.text.normal}
-          />
-        );
-      })}
     </>
   );
 };
 
-const Crown = () => {
-  const theme = useContext(ThemeContext);
+const Crown = (props: { controller: Controller }) => {
   const pixelSize = useContext(PixelSizeContext);
+  const { controller } = props;
   const width = pixelSize * 0.2;
   const height = pixelSize * 0.34;
   return (
     <polygon
       points={`${-width},0 ${width},0 ${width},${-height} ${0},${-height * 0.7} ${-width},${-height}`}
-      fill={theme.game.king.normal}
-      stroke={theme.game.king.contrast}
+      fill={controller.color.normal}
+      stroke={controller.color.contrast}
       strokeWidth="0.5"
     />
   );
 };
 
+interface Controller {
+  color: ThemeColor;
+}
+
 const Creature = (props: {
+  controller: Controller,
   isKing: boolean,
   power: number,
   health: number,
   energy: number,
 }) => {
-  const { isKing, power, health, energy } = props;
+  const { controller, isKing, power, health, energy } = props;
   const theme = useContext(ThemeContext);
   const pixelSize = useContext(PixelSizeContext);
   const numbers = useMemo(() => [
-    { degrees: 30, color: 'red', value: health },
-    { degrees: 150, color: 'black', value: power },
-    { degrees: 270, color: 'brown', value: energy },
+    { degrees: 30, color: theme.game.mountain.normal, value: health },
+    { degrees: 150, color: theme.game.swamp.normal, value: power },
+    { degrees: 270, color: theme.game.forest.normal, value: energy },
   ], [health, power, energy]);
   return (
     <>
@@ -71,8 +70,8 @@ const Creature = (props: {
         cx={0}
         cy={0}
         r={pixelSize * 0.7}
-        fill={theme.typography.accent.disabled}
-        stroke={theme.typography.accent.normal}
+        fill={theme.typography.background.normal}
+        stroke={controller.color.normal}
         strokeWidth={1}
       />
       {numbers.map(number => (
@@ -92,7 +91,7 @@ const Creature = (props: {
       ))}
       {isKing && (
         <g transform={`translate(0,-${pixelSize * 0.65})`}>
-          <Crown />
+          <Crown controller={controller} />
         </g>
       )}
     </>
@@ -116,7 +115,7 @@ const Landing: NextPage = () => {
   const [mode, setMode] = useState<'tile' | 'creature'>('tile');
   const [tiles,, tilesAddons] = useArray(AxialCoordinate.circle(new AxialCoordinate(5, 1), 4));
   const [creatures,, creaturesAddons] = useArray<AxialCoordinate>([]);
-  const [pixelSize, setPixelSize] = useState(27);
+  const [pixelSize, setPixelSize] = useState(40);
   const onClick: MouseEventHandler = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pixel = new Vector2(e.clientX - rect.x, e.clientY - rect.y);
@@ -142,18 +141,20 @@ const Landing: NextPage = () => {
         }
       }
     }
+    e.preventDefault();
+    e.stopPropagation();
   };
   return (
     <>
       <h1>Elemental Arena</h1>
       <ButtonRow style={{ float: 'right' }}>
-        <Button disabled={pixelSize <= 20} onClick={() => setPixelSize(pixelSize - 1)}>
+        <Button disabled={pixelSize <= 32} onClick={() => setPixelSize(pixelSize - 1)}>
           -
         </Button>
-        <Button disabled={pixelSize == 27} onClick={() => setPixelSize(27)}>
+        <Button disabled={pixelSize == 40} onClick={() => setPixelSize(40)}>
           {pixelSize}
         </Button>
-        <Button disabled={pixelSize >= 46} onClick={() => setPixelSize(pixelSize + 1)}>
+        <Button disabled={pixelSize >= 48} onClick={() => setPixelSize(pixelSize + 1)}>
           +
         </Button>
       </ButtonRow>
@@ -177,12 +178,14 @@ const Landing: NextPage = () => {
           }}
           onClick={onClick}
         >
-          {tiles.map(tile => (
+          {tiles.map((tile, i) => (
             <g
               key={tile.toString()}
               transform={`translate(${tile.toPixel(pixelSize).x} ${tile.toPixel(pixelSize).y})`}
             >
-              <Tile />
+              <Tile
+                biome={(['forest', 'mountain', 'swamp'] as ('forest' | 'mountain' | 'swamp')[])[i % 3]}
+              />
             </g>
           ))}
           {creatures.map((creature, i) => (
@@ -195,6 +198,7 @@ const Landing: NextPage = () => {
                 health={i * 2}
                 power={Math.round(2 + i / 3)}
                 energy={2}
+                controller={{ color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB }}
               />
             </g>
           ))}
