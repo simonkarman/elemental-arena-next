@@ -17,5 +17,8 @@ declare module 'styled-components' {
       accent: ThemeColor;
       error: ThemeColor;
     }
+    game: {
+      king: ThemeColor,
+    }
   }
 }

@@ -14,7 +14,17 @@ export const Button = styled.button<ButtonProps>`
   padding: 0.25em 1em;
   cursor: pointer;
 
+  ${(props) => !props.primary && css`
+    /* non primary */
+    :disabled {
+      border-color: ${(props.accent || props.theme.typography.accent).disabled};
+      color: ${(props.accent || props.theme.typography.accent).disabled};
+      cursor: default;
+    }
+  `}
+
   ${(props) => props.primary && css`
+    /* primary */
     background: ${(props.accent || props.theme.typography.accent).normal};
     color: ${(props.accent || props.theme.typography.accent).contrast};
 
@@ -22,10 +32,4 @@ export const Button = styled.button<ButtonProps>`
       background: ${(props.accent || props.theme.typography.accent).disabled};
     }
   `};
-
-  :disabled {
-    border-color: ${props => (props.accent || props.theme.typography.accent).disabled};
-    color: ${props => (props.accent || props.theme.typography.accent).disabled};
-    cursor: default;
-  }
 `;

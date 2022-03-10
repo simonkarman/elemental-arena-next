@@ -24,4 +24,11 @@ export const invertedTheme: DefaultTheme = {
       disabled: '#B0002080',
     },
   },
+  game: {
+    king: {
+      normal: '#D4AF37',
+      contrast: black,
+      disabled: '#E2C876',
+    },
+  },
 };

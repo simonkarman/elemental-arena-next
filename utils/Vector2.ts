@@ -51,7 +51,11 @@ export class Vector2 {
   }
 
   public toString() {
-    return `Vector2(${this.x}, ${this.y})"`;
+    return `Vector2(${this.x}, ${this.y})`;
+  }
+
+  public toSvgString() {
+    return `${this.x},${this.y}`;
   }
 
   public get length() {
@@ -65,5 +69,10 @@ export class Vector2 {
   }
   public distance(other: Vector2) {
     return Vector2.distance(this, other);
+  }
+
+  public static fromDegrees(degrees: number) {
+    var radians = Math.PI / 180 * degrees;
+    return new Vector2(Math.cos(radians), Math.sin(radians));
   }
 }

@@ -84,7 +84,7 @@ export class AxialCoordinate {
   }
 
   public toString() {
-    return `Axial(${this.q}, ${this.r})"`;
+    return `Axial(${this.q}, ${this.r})`;
   }
 
   public get length() {
