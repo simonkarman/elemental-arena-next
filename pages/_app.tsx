@@ -28,7 +28,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Container = styled.div`
-  width: 700px;
+  width: 900px;
   margin: auto;
   padding: 1em;
 `;

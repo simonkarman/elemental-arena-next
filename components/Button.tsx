@@ -30,6 +30,7 @@ export const Button = styled.button<ButtonProps>`
 
     :disabled {
       background: ${(props.accent || props.theme.typography.accent).disabled};
+      cursor: default;
     }
   `};
 `;

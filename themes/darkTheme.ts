@@ -27,28 +27,28 @@ export const darkTheme: DefaultTheme = {
   game: {
     playerA: {
       normal: '#FF5D00',
-      contrast: black,
+      contrast: white,
       disabled: '#FF5D0080',
     },
     playerB: {
       normal: '#00478F',
-      contrast: black,
+      contrast: white,
       disabled: '#00478F80',
     },
     forest: {
       normal: '#59981A',
-      contrast: black,
-      disabled: '#3D550C',
+      contrast: white,
+      disabled: '#3D550C80',
     },
     mountain: {
       normal: '#D41E00',
-      contrast: black,
-      disabled: '#481D01',
+      contrast: white,
+      disabled: '#481D0180',
     },
     swamp: {
       normal: '#695E93',
-      contrast: black,
-      disabled: '#281C2D',
+      contrast: white,
+      disabled: '#281C2D80',
     },
   },
 };
