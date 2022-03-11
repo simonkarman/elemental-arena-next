@@ -23,7 +23,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   svg text {
-    pointer-events: none;
+    cursor: default;
   }
 `;
 

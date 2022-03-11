@@ -24,31 +24,28 @@ const Tile = (props: { biome: 'forest' | 'mountain' | 'swamp'}) => {
         fill={theme.game[biome].normal}
         fillOpacity={0.1}
         stroke={theme.typography.text.normal}
-        strokeWidth={0.5}
-        strokeOpacity={0.3}
+        strokeWidth={0.3}
       />
     </>
   );
 };
 
 const Creature = (props: {
+  name: string,
   color: ThemeColor,
   power: number,
   health: number,
   baseEnergy: number,
   energy: number,
-  icons: { color: ThemeColor, icon: string, action: () => void }[],
+  icons: { enabled: boolean, tooltip: string, color: ThemeColor, icon: string, action: () => void }[],
 }) => {
-  const { color, power, health, baseEnergy, energy, icons } = props;
+  const { name, color, power, health, baseEnergy, energy, icons } = props;
   const theme = useContext(ThemeContext);
   const pixelSize = useContext(PixelSizeContext);
-  const numbers = useMemo(() => [
-    { fontSize: pixelSize / 3, degrees: 40, color: theme.game.mountain.normal, value: health.toString() },
-    { fontSize: pixelSize / 3, degrees: 140, color: theme.game.swamp.normal, value: power.toString() },
-    { fontSize: pixelSize / 3, degrees: 250, color: theme.game.forest.normal, value: energy.toString() },
-    { fontSize: pixelSize / 4, degrees: 300, color: theme.game.forest.disabled, value: `/${baseEnergy}` },
-  ], [health, power, energy]);
-  const iconOffset = icons.length === 0 || icons[0].icon === '👑' ? 0 : 50;
+  const powerAndHealth = useMemo(() => [
+    { fontSize: pixelSize / 3.5, degrees: 40, color: theme.game.mountain.normal, value: `${health}` },
+    { fontSize: pixelSize / 3.5, degrees: 140, color: theme.game.swamp.normal, value: `${power}` },
+  ], [pixelSize, health, power]);
   return (
     <>
       <circle
@@ -59,16 +56,54 @@ const Creature = (props: {
         stroke={color.normal}
         strokeWidth={1.75}
       />
-      {numbers.map(number => (
+      <rect
+        x={-pixelSize / 2}
+        width={pixelSize}
+        y={-pixelSize * 0.72}
+        height={pixelSize * 0.24}
+        fill={theme.typography.background.normal}
+        stroke={color.normal}
+        strokeWidth={1.75}
+      />
+      <text
+        fill={theme.typography.text.normal}
+        fontSize={pixelSize / 5}
+        alignmentBaseline='central'
+        textAnchor='middle'
+        y={-pixelSize * 0.6}
+        fontWeight="700"
+      >
+        {name.substring(0, 7)}
+      </text>
+      {Array.from({ length: baseEnergy }, (_, i) => {
+        const enabled = i < energy;
+        const width = (pixelSize / 4.5) * (baseEnergy - 1);
+        return (
+          <circle
+            fill={enabled ? theme.game.forest.normal : theme.game.forest.disabled}
+            fillOpacity={enabled ? 1 : 0.3}
+            cx={(-width / 2) + (width / (baseEnergy - 1)) * i}
+            cy={-pixelSize * 0.25}
+            r={pixelSize / 10}
+            stroke={theme.game.forest.normal}
+            strokeWidth={0.5}
+          />
+        );
+      })}
+      {powerAndHealth.map(number => (
         <g
           key={number.degrees}
-          transform={`translate(${Vector2.fromDegrees(number.degrees).mutliply(pixelSize / 4).toSvgString()})`}
+          transform={`translate(${Vector2
+            .fromDegrees(number.degrees)
+            .mutliply(pixelSize / 4)
+            .toSvgString()})`}
         >
           <text
             fill={number.color}
             alignmentBaseline='middle'
             textAnchor='middle'
             fontSize={number.fontSize}
+            fontWeight='900'
           >
             {number.value}
           </text>
@@ -77,22 +112,28 @@ const Creature = (props: {
       {icons.map((icon, i) => (
         <g
           key={icon.icon}
-          transform={`translate(${Vector2.fromDegrees(270 + iconOffset + i * 50).mutliply(pixelSize * 0.7).toSvgString()})`}
+          transform={`translate(${Vector2.fromDegrees(0 + i * 45).mutliply(pixelSize * 0.65).toSvgString()})`}
         >
           <circle
             cx={0}
             cy={0}
-            r={pixelSize / 4}
-            fill={icon.color.normal}
-            stroke={icon.color.contrast}
+            r={pixelSize / 5}
+            fill={icon.enabled ? icon.color.normal : icon.color.disabled}
+            fillOpacity={icon.enabled ? 0.9 : 0.5}
+            stroke={icon.color.normal}
+            strokeOpacity={icon.enabled ? 1 : 0.7}
             strokeWidth={0.5}
             onClick={icon.action}
           />
           <text
             alignmentBaseline='middle'
             textAnchor='middle'
-            fontSize={pixelSize / 4}
+            fontSize={pixelSize / 5}
+            fillOpacity={icon.enabled ? 1 : 0.4}
           >
+            <title>
+              {icon.tooltip}
+            </title>
             {icon.icon}
           </text>
         </g>
@@ -200,31 +241,56 @@ const Landing: NextPage = () => {
               transform={`translate(${creature.toPixel(pixelSize).x} ${creature.toPixel(pixelSize).y})`}
             >
               <Creature
+                name={i < 2 ? 'King' : (['Archer', 'Warrior', 'Wizard', 'Long Name Is Very Long'][i % 4])}
                 health={i * 2}
                 power={Math.round(2 + i / 3)}
-                energy={2}
-                baseEnergy={3}
+                energy={i % 4}
+                baseEnergy={i % 5 + 1}
                 color={i % 2 == 0 ? theme.game.playerA : theme.game.playerB}
                 icons={[
-                  ...(i < 2 ? [{
-                    color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB,
-                    icon: '👑',
-                    action: () => console.info('King of', i),
-                  }] : []),
+                  ...(i < 2 ? [
+                    {
+                      enabled: true,
+                      color: i % 2 == 0 ? theme.game.playerA : theme.game.playerB,
+                      icon: '👑',
+                      tooltip: 'King',
+                      action: () => console.info('King of', i),
+                    },
+                    {
+                      enabled: true,
+                      color: theme.game.forest,
+                      icon: '📍',
+                      tooltip: 'Spawner',
+                      action: () => console.info('Spawner of', i),
+                    },
+                    {
+                      enabled: true,
+                      color: theme.game.forest,
+                      icon: '📦',
+                      tooltip: 'Collector',
+                      action: () => console.info('Collector of', i),
+                    },
+                  ] : []),
                   ...(i % 3 == 2 ? [{
-                    color: theme.game.forest,
+                    enabled: true,
+                    color: theme.game.mountain,
                     icon: '🔥',
+                    tooltip: 'Fireball',
                     action: () => console.info('Fireball of', i),
                   }] : []),
                   ...(i % 4 == 3 ? [{
-                    color: theme.game.swamp,
-                    icon: '🌲',
-                    action: () => console.info('Tree of', i),
+                    enabled: true,
+                    color: theme.game.forest,
+                    icon: '🏹',
+                    tooltip: 'Arrowshot',
+                    action: () => console.info('Bow of', i),
                   }] : []),
                   {
-                    color: theme.typography.background,
-                    icon: '🥑',
-                    action: () => console.info('Avocado of', i),
+                    enabled: (Math.floor(i / 2) % 2) === 0,
+                    color: theme.game.swamp,
+                    icon: '🪄',
+                    tooltip: 'Heal',
+                    action: () => console.info('Wand of', i),
                   },
                 ]}
               />
