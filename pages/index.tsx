@@ -304,9 +304,14 @@ const Landing: NextPage = () => {
     () => new Vector2((7 * 2 + 1), 7 * Math.sqrt(3)).mutliply(pixelSize),
     [pixelSize],
   );
+  // eslint-disable-next-line no-process-env
+  const karmanIdentityAPI = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
   return (
     <>
       <h1>Elemental Arena</h1>
+      <p>
+        {`Using Karman identity api at: ${karmanIdentityAPI}`}
+      </p>
       <ButtonRow style={{ float: 'right' }}>
         <Button disabled={pixelSize <= 32} onClick={() => setPixelSize(pixelSize - 1)}>
           -
