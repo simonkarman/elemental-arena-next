@@ -2,8 +2,8 @@ import 'normalize.css';
 import Head from 'next/head';
 import type { AppProps } from 'next/app';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { useState } from 'react';
 import { ThemeSwitcher, ThemeName, themes } from '../components/ThemeSwitcher';
+import { useLocalStorage } from '../hooks';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -34,7 +34,9 @@ const Container = styled.div`
 `;
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [themeName, setThemeName] = useState<ThemeName>('defaultTheme');
+  // TODO: Apply fix from: https://stackoverflow.com/questions/54819721/next-js-access-localstorage-before-rendering-page
+  const [themeName, setThemeName] = useLocalStorage<ThemeName>('theme', 'defaultTheme');
+
   return (
     <>
       <Head>
@@ -45,6 +47,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={themes[themeName]}>
         <ThemeSwitcher
           themeName={themeName}
+          themeNames={['defaultTheme', 'darkTheme']}
           setThemeName={setThemeName}
         />
         <GlobalStyle />

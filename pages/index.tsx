@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import React, { MouseEventHandler, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
 import { Button } from '../components/Button';
-import { useArray } from '../hooks';
+import { useArray, useLocalStorage } from '../hooks';
 import { ThemeColor } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { Vector2 } from '../utils/Vector2';
@@ -240,7 +240,9 @@ const Landing: NextPage = () => {
   const [mode, setMode] = useState<'selection' | 'tile' | 'creature'>('selection');
   const [tiles,, tilesAddons] = useArray(AxialCoordinate.circle(new AxialCoordinate(5, 1), 4));
   const [creatureCoords,, creaturesAddons] = useArray<AxialCoordinate>([]);
-  const [pixelSize, setPixelSize] = useState(40);
+  const [_pixelSize, _setPixelSize] = useLocalStorage<string>('pixel-size', '40');
+  const setPixelSize = (n: number) => _setPixelSize(n.toString());
+  const pixelSize = useMemo(() => Number.parseInt(_pixelSize, 10), [_pixelSize]);
   const [selection, setSelection] = useState<undefined | { location: AxialCoordinate, creature: ReturnType<typeof generateCreature>}>(undefined);
   const [information, setInformation] = useState('');
   useEffect(() => {
@@ -437,7 +439,7 @@ const Landing: NextPage = () => {
                   {selection.creature.health}
                 </b>
                 <br/>
-                engergy:
+                energy:
                 {' '}
                 <b>
                   {selection.creature.energy}

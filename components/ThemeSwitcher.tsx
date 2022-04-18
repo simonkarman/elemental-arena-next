@@ -6,18 +6,17 @@ import { Button } from './Button';
 export const themes = { defaultTheme, darkTheme };
 export type ThemeName = keyof typeof themes;
 
-export interface ThemeSwitcherProps {
+export const ThemeSwitcher = (props: {
   themeName: ThemeName,
+  themeNames: ThemeName[],
   setThemeName: Dispatch<SetStateAction<ThemeName>>
-}
-
-export const ThemeSwitcher = (props: ThemeSwitcherProps) => {
-  const { themeName, setThemeName } = props;
-  const switchTheme = () => setThemeName(
-    themeName === 'defaultTheme'
-      ? 'darkTheme'
-      : 'defaultTheme',
-  );
+}) => {
+  const { themeName, themeNames, setThemeName } = props;
+  const switchTheme = () => {
+    const themeIndex = themeNames.findIndex(name => name === themeName);
+    const nextTheme = (themeIndex + 1) % themeNames.length;
+    setThemeName(themeNames[nextTheme]);
+  };
   return (
     <Button
       onClick={switchTheme}

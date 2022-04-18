@@ -1,16 +1,15 @@
 import {
-  useCallback, useState, useEffect, Dispatch, SetStateAction,
+  useState, useEffect, Dispatch, SetStateAction,
 } from 'react';
 import { usePrevious } from './usePrevious';
 
-const useStorage = (key: string, defaultValue: string | undefined, storage: Storage | undefined): [
-  string | undefined,
-  Dispatch<SetStateAction<string | undefined>>,
-  () => void,
+const useStorage = <T extends string>(key: string, defaultValue: T, storage: Storage | undefined): [
+  T,
+  Dispatch<SetStateAction<T>>,
 ] => {
   const previousKey = usePrevious(key);
-  const [value, setValue] = useState<string | undefined>(() => {
-    const existingValue = storage?.getItem(key);
+  const [value, setValue] = useState<T>(() => {
+    const existingValue = storage?.getItem(key) as T;
     if (!existingValue) {
       return defaultValue;
     }
@@ -36,17 +35,13 @@ const useStorage = (key: string, defaultValue: string | undefined, storage: Stor
     }
   }, [key]);
 
-  const clear = useCallback(() => {
-    setValue(undefined);
-  }, []);
-
-  return [value, setValue, clear];
+  return [value, setValue];
 };
 
-export const useLocalStorage = (key: string, defaultValue?: string) => useStorage(
+export const useLocalStorage = <T extends string>(key: string, defaultValue: T) => useStorage<T>(
   key, defaultValue, process.browser ? window.localStorage : undefined,
 );
 
-export const useSessionStorage = (key: string, defaultValue?: string) => useStorage(
+export const useSessionStorage = <T extends string>(key: string, defaultValue: T) => useStorage<T>(
   key, defaultValue, process.browser ? window.sessionStorage : undefined,
 );
