@@ -11,6 +11,7 @@
     "precommit": "yarn lint && yarn build"
   },
   "dependencies": {
+    "luxon": "^2.4.0",
     "next": "12.1.0",
     "normalize.css": "^8.0.1",
     "react": "17.0.2",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
+    "@types/luxon": "^2.3.2",
     "@types/react": "17.0.22",
     "@types/styled-components": "^5.1.14",
     "@typescript-eslint/eslint-plugin": "^4.31.2",

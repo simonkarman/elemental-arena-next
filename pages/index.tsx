@@ -1,11 +1,13 @@
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import React, { MouseEventHandler, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { DefaultTheme, ThemeContext } from 'styled-components';
 import { Button } from '../components/Button';
-import { useArray, useLocalStorage } from '../hooks';
+import { useArray, useAsync, useLocalStorage } from '../hooks';
 import { ThemeColor } from '../themes/theme';
 import { AxialCoordinate } from '../utils/AxialCoordinate';
 import { Vector2 } from '../utils/Vector2';
+import { DateTime } from 'luxon';
 
 const PixelSizeContext = React.createContext(40);
 
@@ -119,7 +121,7 @@ const Creature = (props: {
       {showIcons && icons.map((icon, i) => (
         <g
           key={icon.icon}
-          transform={`translate(${Vector2.fromDegrees(0 + i * 45).mutliply(pixelSize * 0.65).toSvgString()})`}
+          transform={`translate(${Vector2.fromDegrees(i * 45).mutliply(pixelSize * 0.65).toSvgString()})`}
           onClick={icon.action}
         >
           <circle
@@ -235,8 +237,12 @@ const generateCreature = (i: number, theme: DefaultTheme) => {
   };
 };
 
+const ErrorParagraph = styled.p`color:red;`;
+const SuccessParagraph = styled.p`color:green;`;
+
 const Landing: NextPage = () => {
   const theme = useContext(ThemeContext);
+  const router = useRouter();
   const [mode, setMode] = useState<'selection' | 'tile' | 'creature'>('selection');
   const [tiles,, tilesAddons] = useArray(AxialCoordinate.circle(new AxialCoordinate(5, 1), 4));
   const [creatureCoords,, creaturesAddons] = useArray<AxialCoordinate>([]);
@@ -307,13 +313,37 @@ const Landing: NextPage = () => {
     [pixelSize],
   );
   // eslint-disable-next-line no-process-env
-  const karmanIdentityAPI = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
+  const karmanIdentityAPI = `${process.env.NEXT_PUBLIC_KARMAN_IDENTITY}/api`;
+  const [isLoading, data, error] = useAsync(async () => {
+    return fetch(`${karmanIdentityAPI}/sessions`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(res => {
+        if (res.code === 'UNAUTHORIZED') {
+          throw new Error(res.message);
+        }
+        return res;
+      });
+  }, []);
+  const login = () => {
+    // eslint-disable-next-line no-process-env
+    router.push(`${process.env.NEXT_PUBLIC_KARMAN_IDENTITY}?t=${process.env.NEXT_PUBLIC_DOMAIN}`);
+  };
   return (
     <>
       <h1>Elemental Arena</h1>
-      <p>
-        {`Using Karman identity api at: ${karmanIdentityAPI}`}
-      </p>
+      {isLoading ? <p>Loading...</p> : (<>
+        {error && (<ErrorParagraph>
+          You are not logged in.
+          {` ${JSON.stringify(error)}`}
+          <button onClick={login}>login now</button>
+        </ErrorParagraph>)}
+        {data && (<SuccessParagraph>
+          Hi,
+          {` ${data.user.username}`}
+          ! Note: Your session will expire at:
+          {` ${DateTime.fromMillis(data.exp * 1000).toLocaleString(DateTime.DATETIME_SHORT)}`}
+        </SuccessParagraph>)}
+      </>)}
       <ButtonRow style={{ float: 'right' }}>
         <Button disabled={pixelSize <= 32} onClick={() => setPixelSize(pixelSize - 1)}>
           -
